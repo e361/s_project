@@ -1,9 +1,9 @@
 import socketserver
-import threading 
-import uuid
-import art
+
+class Tracker(socketserver.UDPServer, socketserver.ThreadingMixIn):
+    def __init__(self, address, handler):
+        
+        
 class TrackerHandler():
-    def __init__():
-        self.uuid = list()
 
 
