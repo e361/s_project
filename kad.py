@@ -35,7 +35,6 @@ class DHTRequestHandler(socketserver.BaseRequestHandler):
 				self.handle_found_value(message)
 			elif message_type == "store":
 				self.handle_store(message)
-                # what do u want of KeyError or ValueError???
 		except KeyError:
 			pass
 		except ValueError:
