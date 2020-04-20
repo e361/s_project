@@ -12,12 +12,8 @@ class Peer(object):
     def astriple(self):
         return (self.host, self.port, self.id, self.info)
     
-    """ if u dont want it
-        dont write it down pls.
-        asquadddddddddddddd..........???@#$%^ 
-    def asquad(self):
+    def findUser(self):
         return (self.host, self.port, self.id, self.info)
-    """
     
     # Maybe for socket connection.
     def address(self):
