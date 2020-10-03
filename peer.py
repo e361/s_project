@@ -7,8 +7,8 @@ class Peer(object):
     ''' DHT Peer Information'''
     def __init__(self, host, port, id, info):
         self.host, self.port, self.id, self.info = host, port, id, info
-    
-    # What is mother fucker name for a-s-t-r-i-p-l-e???
+        self.roomInfo = {}
+
     def astriple(self):
         return (self.host, self.port, self.id, self.info)
     
