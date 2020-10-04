@@ -45,6 +45,10 @@ class chatroom():
         mov = input()
         return mov
 
+class User():
+    def _createRoom(self):
+        
+
 if __name__ == "__main__":
     chat = chatroom()
     local = DHT(host = nodeInfo[0], port = nodeInfo[1], id = nodeInfo[2], info = chat.username)

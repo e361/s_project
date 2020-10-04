@@ -12,16 +12,7 @@ class Handler(socketserver.BaseRequestHandler):
     def handle(self):
         data = json.loads(self.request.recv(1024))
         
-        if data['message_type'] == 'create_room':
-            uid  = uuid.uuid4()
-            user = self.client_address
-            self.server.creatRoom(user, uid)
-            response = bytes(uid.hex, 'ascii')
-
-        elif data['message_type'] == 'invite':
-            pass
-
-        elif data['message_type'] == 'join':
+        if data['message_type'] == 'join':
             accountInfo = {data['user_name'] : data['peer_info']}
             self.server.join(accountInfo)
             response = bytes('join completed!', 'ascii')
@@ -36,15 +27,13 @@ class Handler(socketserver.BaseRequestHandler):
 
         self.request.sendall(response)
         
-        print(self.server.room, self.server.user_list)
+        print(self.server.user_list)
 
 class BootServer(socketserver.TCPServer):
     
     def __init__(self, address, handler):
         socketserver.TCPServer.__init__(self, (host, port), handler)
-        self.room = []
-        self.user_list = dict()
-
+        self.user_list = {}
     def join(self, user_name):
         self.user_list.update(user_name)
         return None
