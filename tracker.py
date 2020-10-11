@@ -14,8 +14,11 @@ class Handler(socketserver.BaseRequestHandler):
         
         if data['message_type'] == 'join':
             accountInfo = {data['user_name'] : data['peer_info']}
-            self.server.join(accountInfo)
-            response = bytes('join completed!', 'ascii')
+            response = self.server.join(accountInfo)
+            if response:
+                response = bytes(str(response), 'ascii')
+            else:
+                response = bytes('join completed!\nBut theres no seed in the kademlia network.', 'ascii')
 
         elif data['message_type'] == 'offline':
             user_name = data['user_name']
@@ -26,35 +29,31 @@ class Handler(socketserver.BaseRequestHandler):
             response = bytes("Hello I'm BootServer, please enter a valid command.", "ascii")
 
         self.request.sendall(response)
-        
-        print(self.server.user_list)
 
 class BootServer(socketserver.TCPServer):
     
     def __init__(self, address, handler):
         socketserver.TCPServer.__init__(self, (host, port), handler)
-        self.user_list = {}
-    def join(self, user_name):
-        self.user_list.update(user_name)
-        return None
+        self.userList = {}
+        print("Boot Server Start!")
+        print("目前線上節點: %s\n " % self.userList)
+        
+    def join(self, accountInfo):
+        if self.userList:
+            seed = random.choice(list(self.userList.keys() ))
+            seed = self.userList[seed]
+        else:
+            seed = None
+        print("更新節點資訊...")
+        self.userList.update(accountInfo)
+        print("目前線上節點: %s\n" % self.userList)
+        return seed
 
     def offline(self, accountInfo):
-        self.user_list.pop(accountInfo)
-
-    '''
-    def creatRoom(self, user, room_id):
-        self.room.append(room_id)
-        self.user_list["room_id"] = user
-
-    def joinRoom(self, room_id):
-        
-        """ give the host information to the applicant??
-            or give the last applicant node information?
-            the other way is record all of applicant of the same lobby.
-        """
-        pass
-    '''
-
+        print("收到離線訊息...")
+        self.userList.pop(accountInfo)
+        print("更新節點資訊...")
+        print("目前線上節點: %s\n" % self.userList)
 
 if __name__ == "__main__":
     try:
