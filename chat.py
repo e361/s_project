@@ -57,11 +57,11 @@ class Chatroom():
         pass
 
 class User():
-    def createRoom(self, kad):
+    def createRoom(self, local):
         roomId = uuid.uuid4()  
         print("創造新的群組...", roomId)
-        kad.roomInfo.update({roomId : [peer.info] })
-        print("新增到群組列表... % s \n" % kad.peer.roomInfo)
+        local.peer.roomInfo.update({roomId : [local.peer.info] })
+        print("新增到群組列表... % s \n" % local.peer.roomInfo)
 
     def invite(self, user, roomId):
         pass
