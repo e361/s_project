@@ -15,6 +15,7 @@ class Chatroom():
     def __init__(self):
         self.tip = None
         self.username = None
+        self.bootPeer = None
         mov = self.intro()
         self.join()
          
@@ -25,6 +26,8 @@ class Chatroom():
                 sock.sendall(request.encode("ascii"))
                 response = str(sock.recv(1024), "ascii")
                 print("Received: {}\n".format(response) )
+                return response
+
         except OSError as e:
             print("registry process failed, please try again")
 
@@ -43,7 +46,10 @@ class Chatroom():
         nodeId = random_id()
         localPort = 9001
         request = json.dumps({"user_name" : self.username, "message_type" : "join", "peer_info" : (host, localPort, nodeId) })
-        self.__callBootServer(request)
+        response = self.__callBootServer(request).strip("[']").split(',')
+        if 'join' not in response[0]:
+            self.bootPeer = (response[0].strip("'"), int(response[1]), int(response[2]))
+            print("回傳的啟動節點: ",  self.bootPeer)
     
     def offline(self):
         print("對 BootServer 傳送 offline 命令...")
@@ -76,7 +82,14 @@ class User():
 
 if __name__ == "__main__":
     chat = Chatroom()
-    local = DHT(host = nodeInfo[0], port = nodeInfo[1], id = nodeInfo[2], info = chat.username)
+
+    if chat.bootPeer:
+        local = DHT(host = nodeInfo[0], port = nodeInfo[1], id = nodeInfo[2], seeds = [chat.bootPeer], info = chat.username)
+    else:
+        local = DHT(host = nodeInfo[0], port = nodeInfo[1], id = nodeInfo[2], info = chat.username)
+
+    print("目前的鄰近節點有: ")
+    print(local.peers())
     monitor = User()
     monitor.createRoom(local)
     while True:

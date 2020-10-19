@@ -83,6 +83,8 @@ class User():
 if __name__ == "__main__":
     chat = Chatroom()
     local = DHT(host = nodeInfo[0], port = 9002, id = nodeInfo[2], seeds = [chat.bootPeer], info = chat.username)
+    print("目前的鄰近節點列表有: ")
+    print(local.peers())
     monitor = User()
     monitor.createRoom(local)
     while True:
