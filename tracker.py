@@ -61,5 +61,5 @@ if __name__ == "__main__":
         server.serve_forever()
 
     except KeyboardInterrupt:
-        threading.Thread(target = server.shutdown())
+        threading.Thread(target = server.server_close())
         print("\nServer close.")

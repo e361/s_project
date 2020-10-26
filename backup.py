@@ -10,7 +10,7 @@ import time
 
 host = "localhost"
 port = 9000
-nodeInfo = ("localhost", 9001, random_id())
+nodeInfo = ("localhost", 9002, random_id())
 
 class Chatroom():
     def __init__(self):
@@ -24,13 +24,12 @@ class Chatroom():
             mov = self.intro()
         else:
             self.username = data[0]
-            nodeInfo = ("localhost", 9001, int(data[1]))
             print("已經有節點id 和 username")
             print("username: %s , id: %s" % (data[0], data[1]))
         self.join()
          
     def readConfigFile(self, f=None):
-        with open("login.txt", 'r') as f:
+        with open("login2.txt", 'r') as f:
             tmp =  f.readlines()
         if not tmp:
             return None
@@ -64,7 +63,8 @@ class Chatroom():
     def join(self):
         print("\n對 BootServer 傳送 join 命令...")
         nodeId = random_id()
-        request = json.dumps({"user_name" : self.username, "message_type" : "join", "peer_info" : nodeInfo})
+        localPort = 9001
+        request = json.dumps({"user_name" : self.username, "message_type" : "join", "peer_info" : (host, localPort, nodeId) })
         response = self.__callBootServer(request).strip("[']").split(',')
         if 'join' not in response[0]:
             self.bootPeer = (response[0].strip("'"), int(response[1]), int(response[2]))
@@ -98,7 +98,6 @@ if __name__ == "__main__":
     while True:
         try:
             time.sleep(1)
-            #option = input("你想跟誰聊..")
         except KeyboardInterrupt:
             break
     chat.offline()
