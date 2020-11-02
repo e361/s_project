@@ -2,7 +2,7 @@ from kademlia.kad import DHT
 from kademlia.hashing import random_id
 from art import *
 
-from essential import User
+from essential import User, MouthPiece
 
 import socket
 import json
@@ -12,7 +12,7 @@ host = "localhost"
 port = 9000
 nodeInfo = ("localhost", 9001, random_id())
 
-class Chatroom():
+class Chatroom(MouthPiece):
     def __init__(self):
         self.username = None
         self.bootPeer = None
@@ -73,7 +73,7 @@ class Chatroom():
     def offline(self):
         print("對 BootServer 傳送 offline 命令...")
         request = json.dumps({"user_name" : self.username, "message_type" : "offline", "peer_info" : nodeInfo}) 
-        self.__callBootServer(request)
+        self.send(host, port, request);
 
     def probe(self):
         pass
@@ -92,8 +92,8 @@ if __name__ == "__main__":
 
     print("目前的鄰近節點有: ")
     print(local.peers())
-    user = User(local)
-    user.createRoom()
+    user = User()
+    user.createRoom(local)
     
     while True:
         try:
