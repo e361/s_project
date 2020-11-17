@@ -1,5 +1,4 @@
 import socketserver
-import threading
 import random
 import uuid
 import json
@@ -7,10 +6,14 @@ import json
 host = "localhost"
 port = 9000
 
+""" BootServer message handler, only response for join and offline requests. """
 class Handler(socketserver.BaseRequestHandler):
-    
     def handle(self):
-        data = json.loads(self.request.recv(1024))
+        """ load json message from any chatroom packet with 3-fold chunk
+            each of user_name, message_type and peer_info
+            maintain as a single table.
+        """
+        data = json.loads(self.request.recv(512))
         
         if data['message_type'] == 'join':
             accountInfo = {data['user_name'] : data['peer_info']}
@@ -19,19 +22,18 @@ class Handler(socketserver.BaseRequestHandler):
                 response = bytes(str(response), 'ascii')
             else:
                 response = bytes('join completed!\nBut theres no seed in the kademlia network.', 'ascii')
-
         elif data['message_type'] == 'offline':
             user_name = data['user_name']
             self.server.offline(user_name)
             response = bytes('ok', 'ascii')
 
-        else:
-            response = bytes("Hello I'm BootServer, please enter a valid command.", "ascii")
-
         self.request.sendall(response)
 
+""" BootSever with simple data structure,
+    record every user with its ip, port and id while receiving join command
+    delete user's data if received offline.
+"""
 class BootServer(socketserver.TCPServer):
-    
     def __init__(self, address, handler):
         socketserver.TCPServer.__init__(self, (host, port), handler)
         self.userList = {}
@@ -40,10 +42,11 @@ class BootServer(socketserver.TCPServer):
         
     def join(self, accountInfo):
         if self.userList:
-            seed = random.choice(list(self.userList.keys() ))
+            key = random.choice(list(self.userList.keys() ))
             seed = self.userList[seed]
         else:
             seed = None
+
         print("更新節點資訊...")
         self.userList.update(accountInfo)
         print("目前線上節點: %s\n" % self.userList)
@@ -62,5 +65,5 @@ if __name__ == "__main__":
         server.serve_forever()
 
     except KeyboardInterrupt:
-        threading.Thread(target = server.server_close())
+        server.server_close()
         print("\nServer close.")

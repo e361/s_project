@@ -14,7 +14,7 @@ class MessageTable():
         messageFormat = None
 
 """ 
-    Implementation of user's mechanism for chat room, include
+    Implementation of user's mechanism for chat room
         - createRoom
         - invite
         - leave
@@ -48,17 +48,3 @@ class User(MouthPiece):
                     peer_id = rpc.peer.id,
                     peer_info = rpc.peer.info)
         send(target[0], target[1], message)
-
-
-
-"""
-    Implementaiont of socket which handle transmission of external message.
-"""
-
-class handler(socketserver.BaseRequestHandler):
-    def handle(self):
-       pass 
-
-
-
-

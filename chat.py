@@ -21,7 +21,7 @@ class Chatroom(MouthPiece):
         print("登入中... 尋找是否有帳戶資料...\n")
         time.sleep(1)
         if not data:
-            mov = self.intro()
+            mov = self.login()
         else:
             self.username = data[0]
             nodeInfo = ("localhost", 9001, int(data[1]))
@@ -29,6 +29,15 @@ class Chatroom(MouthPiece):
             print("username: %s , id: %s" % (data[0], data[1]))
         self.join()
          
+    def login(self):
+        print("Welcome to P2Pchat ")
+        time.sleep(1)
+        self.username = input("Please enter your username: ")
+        
+        print("join the kad network? ")
+        mov = input()
+        return mov
+    
     def readConfigFile(self):
         with open("login.txt", 'r') as f:
             tmp =  f.readlines()
@@ -47,16 +56,6 @@ class Chatroom(MouthPiece):
         except OSError as e:
             print("registry process failed, please try again")
 
-    def intro(self):
-        tfont = "standard"
-        tprint("Welcome to P2Pchat, tfont")
-        time.sleep(1)
-        tprint("Please enter your username:", tfont)
-        self.username = input()
-        
-        print("join the kad network? ")
-        mov = input()
-        return mov
 
     def join(self):
         print("\n對 BootServer 傳送 join 命令...")
