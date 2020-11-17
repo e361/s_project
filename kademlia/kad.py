@@ -59,7 +59,8 @@ class DHTRequestHandler(socketserver.BaseRequestHandler):
 
     def handle_pong(self, message):
         # receive ping message response doesn't need to do anything.
-        pass
+        if(message):
+            return True
 
     def handle_find(self, message, find_value=False):
         key = message["id"]

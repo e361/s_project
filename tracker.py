@@ -56,6 +56,7 @@ class BootServer(socketserver.TCPServer):
         print("目前線上節點: %s\n" % self.userList)
 
 if __name__ == "__main__":
+
     try:
         server = BootServer( (host, port), Handler )
         server.serve_forever()

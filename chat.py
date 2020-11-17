@@ -18,7 +18,7 @@ class Chatroom(MouthPiece):
         self.bootPeer = None
         data = self.readConfigFile()
 
-        print("登入中... 尋找是否有帳戶資料...")
+        print("登入中... 尋找是否有帳戶資料...\n")
         time.sleep(1)
         if not data:
             mov = self.intro()
@@ -29,14 +29,11 @@ class Chatroom(MouthPiece):
             print("username: %s , id: %s" % (data[0], data[1]))
         self.join()
          
-    def readConfigFile(self, f=None):
+    def readConfigFile(self):
         with open("login.txt", 'r') as f:
             tmp =  f.readlines()
-        if not tmp:
-            return None
-        else:
             tmp = list(map(lambda x : x.strip('\n'), tmp))
-            return tmp
+        return tmp
 
     def __callBootServer(self, request):
         try:
@@ -91,14 +88,20 @@ if __name__ == "__main__":
         local = DHT(host = nodeInfo[0], port = nodeInfo[1], id = nodeInfo[2], info = chat.username)
 
     print("目前的鄰近節點有: ")
-    print(local.peers())
+    print(local.peers(), end='\n\n')
     user = User()
     user.createRoom(local)
     
     while True:
         try:
             time.sleep(1)
-            #option = input("你想跟誰聊..")
+            print("""選擇功能: 
+                  1. 搜尋聊天室對象 
+                  2. 創造群組
+                  3. 離開群組
+                  4. 聊天
+                  5. 顯示群組和用戶 """)
+
         except KeyboardInterrupt:
             break
     chat.offline()
