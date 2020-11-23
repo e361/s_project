@@ -1,12 +1,11 @@
 from kademlia.kad import DHT
 from kademlia.hashing import random_id
-from art import *
-
-from essential import User, MouthPiece
+from user import User, MouthPiece, Handler
 
 import socket
 import json
 import time
+import user
 
 host = "localhost"
 port = 9000
@@ -21,7 +20,7 @@ class Chatroom(MouthPiece):
         print("登入中... 尋找是否有帳戶資料...\n")
         time.sleep(1)
         if not data:
-            mov = self.login()
+            self.login()
         else:
             self.username = data[0]
             nodeInfo = ("localhost", 9001, int(data[1]))
@@ -33,14 +32,17 @@ class Chatroom(MouthPiece):
         print("Welcome to P2Pchat ")
         time.sleep(1)
         self.username = input("Please enter your username: ")
+        f = open("login.txt", 'w')
+        f.write("{}\n".format(self.username))
+        f.write(str(random_id()) )
+        f.close()
         
-        print("join the kad network? ")
-        mov = input()
-        return mov
+        print("join into the kad network... ")
+        time.sleep(2)
     
     def readConfigFile(self):
         with open("login.txt", 'r') as f:
-            tmp =  f.readlines()
+            tmp = f.readlines()
             tmp = list(map(lambda x : x.strip('\n'), tmp))
         return tmp
 
@@ -69,7 +71,7 @@ class Chatroom(MouthPiece):
     def offline(self):
         print("對 BootServer 傳送 offline 命令...")
         request = json.dumps({"user_name" : self.username, "message_type" : "offline", "peer_info" : nodeInfo}) 
-        self.send(host, port, request);
+        self.__callBootServer(request)
 
     def probe(self):
         pass
@@ -88,19 +90,39 @@ if __name__ == "__main__":
 
     print("目前的鄰近節點有: ")
     print(local.peers(), end='\n\n')
-    user = User()
-    user.createRoom(local)
+    user = User(Handler)
     
     while True:
         try:
             time.sleep(1)
-            print("""選擇功能: 
-                  1. 搜尋聊天室對象 
-                  2. 創造群組
-                  3. 離開群組
-                  4. 聊天
-                  5. 顯示群組和用戶 """)
+            instruction = input("""選擇功能: \n\t1. 搜尋聊天室用戶 
+                    \n\t2. 創造群組
+                    \n\t3. 離開群組
+                    \n\t4. 聊天
+                    \n\t5. 顯示聊天室群組 
+                    \n\t6. 邀請 =====> """)
 
+            if(instruction == '1'):
+                for users in local.peers():
+                    print("線上用戶: {}".format(users['info']))
+               
+            if(instruction == '2'):
+                user.createRoom(local)
+
+            if(instruction == '3'):
+                pass
+            if(instruction == '4'):
+                target = input("想傳給誰??")
+                message = input("想傳些什麼??")
+                message = {"message_type" : 'sendmessage', "user_name" : local.peer.info, "content" : message}
+                user.sendMessage(message, target, local)
+
+            if(instruction == '5'):
+                print("群組..... {}".format(local.peer.roomInfo))
+
+            if(instruction == '6'):
+                pass
+            
         except KeyboardInterrupt:
             break
     chat.offline()
