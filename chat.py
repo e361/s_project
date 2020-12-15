@@ -3,22 +3,26 @@ from kademlia.hashing import random_id
 from user import User, MouthPiece, Handler
 
 import threading
-import socket
-import json
 import time
-import user
+import json
 
 class Chatroom(MouthPiece):
+    """ 
+        host, port := ip and port of kademlia.
+        peerId     := id of kademlia.
+        bootPeer   := one of others kademlia peer online.
+        bootServer := the ip and port of the tracker.
+    """
     def __init__(self):
-        self.host = "localhost"
+        self.host = "127.0.0.1"
         self.port = 9001
         self.peerId = None
         self.bootPeer = None
         self.bootServer = ("localhost", 9000)
+        self.network = dict()
 
         loginData = self.readLoginFile()
         print("登入中... 尋找是否有帳戶資料...\n")
-        time.sleep(1)
         if not loginData:
             self.login()
         else:
@@ -49,6 +53,8 @@ class Chatroom(MouthPiece):
         try:
             response = self.send(self.bootServer[0], self.bootServer[1], request)
             response = response.strip("[']").split(',')
+
+            # tracker response for no seed!
             if 'join' not in response[0]:
                 self.bootPeer = (response[0].strip("'"), int(response[1]), int(response[2]))
                 print("回傳的啟動節點: ",  self.bootPeer)
@@ -56,78 +62,25 @@ class Chatroom(MouthPiece):
         except Exception as e:
             print("Theres something problem, {}".format(e))
     
-    def offline(self):
+    def offline(self, user):
         print("\n對 BootServer 傳送 offline 命令...")
         request = self.dumpMessage("offline", {"user_name" : self.username, "peer_info" : (self.host, self.port, self.peerId)}) 
 
         # receive an "ok" from bootServer
         ok = self.send(self.bootServer[0], self.bootServer[1], request)
         print(ok)
+        if user.room:
+            with open('group.txt', 'w') as f:
+                f.write(json.dumps(user.room))
+    def probe(self, rpc, user):
+        for u in rpc.peers():
+            key = u['info']
+            value = u['host']
+            self.network.update({key: value})
 
-    def probe(self):
-        pass
-
-    def retrieve(self):
-        pass
-
-
-if __name__ == "__main__":
-    chat = Chatroom()
-
-    if chat.bootPeer:
-        local = DHT(host = chat.host, port = chat.port, id = chat.peerId, seeds = [(chat.bootPeer)], info = chat.username)
-    else:
-        local = DHT(host = chat.host, port = chat.port, id = chat.peerId, info = chat.username)
-
-    user = User(Handler, local)
-    chatDaemon = threading.Thread(target = user.serve_forever, daemon = True)
-    chatDaemon.start()
-
-    
-    while True:
-        try:
-            instruction = input("""選擇功能: \n\t1. 搜尋聊天室用戶 
-                    \n\t2. 創造群組
-                    \n\t3. 離開群組
-                    \n\t4. 聊天
-                    \n\t5. 顯示聊天室群組 
-                    \n\t6. 邀請 ===============\n """)
-
-            if(instruction == '1'):
-                for users in local.peers():
-                    print("線上用戶: {}, ip: {}".format(users['info'], users['host']))
-               
-            if(instruction == '2'):
-                user.createRoom()
-
-            if(instruction == '3'):
-                print(list(local.peer.roomInfo.keys()))
-                roomId = input("想要離開的大廳?")
-                message = user.dumpMessage("leave", {"user_name": chat.username, "roomId": roomId})
-                user.send("localhost",9010, message)
-                user.delRoom(roomId)
-
-            if(instruction == '4'):
-                target = input("想傳給誰??")
-                message = input("想傳些什麼??")
-                user.sendMessage({"content": message, "user_name": local.peer.info}, (target, 9010), local) 
-                
-
-            if(instruction == '5'):
-                print("目前群組..... {}".format(user.room))
-
-            if(instruction == '6'):
-                target = input("想邀請誰??")
-                print(list(local.peer.roomInfo.keys()))
-                roomId = input("大廳名字??")
-                message = json.dumps({"message_type" : 'invite', "user_name": user.username, "roomId": roomId, "roomMember": user.room[roomId]})
-                user.send(target, 9010, message)
-                member = user.room[roomId]
-                for u in local.peers():
-                    if u['host'] == target:
-                        member.append(u['info'])
-
-
-        except KeyboardInterrupt:
-            break
-    chat.offline()
+    def retrieve(self, user):
+        message = self.dumpMessage("retrieve", {"username": self.username, "host": self.host})
+        for target in self.network:
+            response = self.send(self.network[target], 9002, message)
+            with open('history.txt', 'a') as f:
+                pass

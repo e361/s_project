@@ -1,6 +1,5 @@
 import socketserver
 import random
-import uuid
 import json
 
 host = "localhost"
@@ -18,7 +17,7 @@ class Handler(socketserver.BaseRequestHandler):
                     | peer_info           |        |         
                     +---------------------+--------+
         """
-        packet = json.loads(self.request.recv(512))
+        packet = json.loads(self.request.recv(1024))
         
         if packet['message_type'] == 'join':
             accountInfo = {packet['user_name'] : packet['peer_info']}
@@ -26,8 +25,10 @@ class Handler(socketserver.BaseRequestHandler):
 
             if response:
                 response = bytes(str(response), 'ascii')
+                print("seed is %s" % str(response))
             else:
                 response = bytes('join completed!\nBut theres no seed in the kademlia network.', 'ascii')
+                print("No Seed!")
         elif packet['message_type'] == 'offline':
             user_name = packet['user_name']
             self.server.offline(user_name)
@@ -40,8 +41,9 @@ class Handler(socketserver.BaseRequestHandler):
     delete user's record if received offline.
 """
 class BootServer(socketserver.TCPServer):
-    def __init__(self, address, handler):
-        socketserver.TCPServer.__init__(self, (host, port), handler)
+    def __init__(self, handler):
+        listen = (host, port)
+        socketserver.TCPServer.__init__(self, listen, handler)
         self.hookList = {}
         print("Boot Server Start!")
         print("目前線上節點: %s\n " % self.hookList)
@@ -58,16 +60,16 @@ class BootServer(socketserver.TCPServer):
         print("目前線上節點: %s\n" % self.hookList)
         return seed
 
-    def offline(self, accountInfo):
+    def offline(self, key):
         print("收到離線訊息...")
-        self.hookList.pop(accountInfo)
+        if self.hookList.get(key, None):
+            self.hookList.pop(key)
         print("更新節點資訊...")
         print("目前線上節點: %s\n" % self.hookList)
 
 if __name__ == "__main__":
-
     try:
-        server = BootServer( (host, port), Handler )
+        server = BootServer(Handler)
         server.serve_forever()
 
     except KeyboardInterrupt:

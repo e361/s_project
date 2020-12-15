@@ -16,9 +16,8 @@ class MouthPiece():
         except ConnectionRefusedError:
             print("Oops 對方不在, 聊天室處理中~")
             with open('backup.txt', 'a') as f:
-                message = json.loads(message)
-                message.update({"host": host})
-                f.write(json.dumps(message) + '\n')
+                f.write(host+' ')
+                f.write(message +'\n')
 
     def dumpMessage(self, command, kwargs):
         request = dict({"message_type": command}, **kwargs)
@@ -83,7 +82,7 @@ class Handler(socketserver.BaseRequestHandler):
 class User(socketserver.ThreadingMixIn, socketserver.TCPServer, MouthPiece):
 
     def __init__(self, handler, rpc):
-        self.server = socketserver.TCPServer.__init__(self, ("localhost", 9002), handler)
+        self.server = socketserver.TCPServer.__init__(self, ("localhost", 9010), handler)
         self.room = rpc.peer.roomInfo
         self.connPort = 9002
         self.username = rpc.peer.info
@@ -95,8 +94,10 @@ class User(socketserver.ThreadingMixIn, socketserver.TCPServer, MouthPiece):
     def roomUpdate(self):
         with open('group.txt', 'r') as f:
             tmp = f.readlines()
+        print(tmp)
         for record in tmp:
             record = json.loads(record)
+            print(record)
             self.room.update(record)
     """ 
         new a roomId, and record it in kademlia peer's roomInfo.
@@ -117,7 +118,7 @@ class User(socketserver.ThreadingMixIn, socketserver.TCPServer, MouthPiece):
         for user in targets: 
             self.send(user, 9002, message)
         self.delRoom(roomId)
-       
+        
     def sendMessage(self, targets, message, roomId=None):
         now = time.ctime(time.time())
         packet = {"time": now, "roomId": roomId, "user_name": self.username, "content": message+'\n'}

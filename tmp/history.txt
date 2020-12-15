@@ -1,0 +1,21 @@
+
+hello
+123
+are u fine?
+{'message_type': 'sendmessage', 'user_name': 'e361', 'content': '123\n', 'time': 'Sun Dec 13 20:56:40 2020'}{'message_type': 'sendmessage', 'user_name': 'e361', 'content': 'are u join it!?\n', 'time': 'Mon Dec 14 10:28:20 2020'}{'message_type': 'sendmessage', 'user_name': 'e361', 'content': 'are u ther?\n', 'time': 'Mon Dec 14 10:48:32 2020'}{'message_type': 'sendmessage', 'user_name': 'e361', 'content': 'hello\n', 'time': 'Mon Dec 14 11:15:28 2020'}{'message_type': 'sendmessage', 'user_name': 'e361', 'content': 'someone there!?\n', 'time': 'Mon Dec 14 11:16:08 2020'}{'message_type': 'sendmessage', 'time': 'Mon Dec 14 11:42:56 2020', 'roomId': None, 'user_name': 'e361', 'content': 'local\n'}Mon Dec 14 11:46:17 2020,e361,local peer?
+
+Mon Dec 14 11:47:01 2020,e361,nothing
+
+Mon Dec 14 11:50:25 2020,e361,local host u?
+
+Mon Dec 14 12:06:03 2020,e361,how are u
+
+Mon Dec 14 12:06:50 2020,e361,this is a group conversation!
+
+Mon Dec 14 16:46:33 2020,None,e361,hello
+Mon Dec 14 16:46:50 2020,None,e362,hello too
+Mon Dec 14 16:47:34 2020,None,e362,are u fine?
+Mon Dec 14 20:25:48 2020,None,e361,hello
+Tue Dec 15 14:49:04 2020,None,e361,hello
+Tue Dec 15 14:49:16 2020,None,e362,are u fine?
+Tue Dec 15 14:57:53 2020,None,e361,are u firne/
