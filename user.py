@@ -9,12 +9,15 @@ class MouthPiece():
     def send(self, host, port, message):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                print(sock.gettimeout())
                 sock.connect( (host, port))
                 sock.sendall(message.encode('ascii'))
                 response = str(sock.recv(1024), "ascii")
             return response
-        except ConnectionRefusedError:
+        except Exception:
             print("Oops 對方不在, 聊天室處理中~")
+            if message['message_type'] == 'join' or message['message_type'] == 'offline':
+                return
             with open('backup.txt', 'a') as f:
                 message = json.loads(message)
                 message.update({"host": host})
@@ -50,27 +53,31 @@ class Handler(socketserver.BaseRequestHandler):
         if packet["message_type"] == "retrieve":
             response = [] 
             new = []
-            data = packet.get("content", None)
-            if data:
-                pass
             ip = packet['host']
             print("開始獲取離線檔案")
             with open('backup.txt', 'r+') as f:
-                for line in f:
-                    print(line)
-                    inx = line.find(' ')
-                    data = line[0:inx], line[inx+1:-1]
-                    print(data[0],ip) 
-                    print(data[1])
-                    if data[0] == ip:
-                        response.append(data[1])  
-                    else:
-                        new.append(data[0]+ " " + data[1])
+                response = f.readlines()
+
+            for item in response:
+                tmp = json.loads(item)
+                if tmp['host'] == packet['host']:
+                    if tmp['message_type'] == 'invite':
+                        self.server.send(tmp['host'], 9002, item)
+                    elif tmp['message_type'] == 'leave':
+                        self.server.send(tmp['host'], 9002, item)
+                    elif tmp['message_type'] == 'sendmessage':
+                        roomId = tmp['roomId']
+                        self.server.send(tmp['host'], 9002, item)
+
+            for item in response:
+                tmp = json.loads(item)
+                if tmp['host'] != packet['host']:
+                    new.append(item)
+
             with open('backup.txt', 'w') as f:
                 for item in new:
                     f.write(item)
             print(response)
-            self.request.sendall(bytes(str(response), 'ascii'))
 
 """ 
     Implementation of user's mechanism for chat room
