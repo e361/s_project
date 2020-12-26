@@ -9,7 +9,7 @@ class MouthPiece():
     def send(self, host, port, message):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                print(sock.gettimeout())
+                sock.settimeout(3)
                 sock.connect( (host, port))
                 sock.sendall(message.encode('ascii'))
                 response = str(sock.recv(1024), "ascii")
