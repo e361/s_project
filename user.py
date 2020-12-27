@@ -16,10 +16,12 @@ class MouthPiece():
             return response
         except Exception:
             print("Oops 對方不在, 聊天室處理中~")
-            if message['message_type'] == 'join' or message['message_type'] == 'offline':
-                return
             with open('backup.txt', 'a') as f:
                 message = json.loads(message)
+                if message['message_type'] == 'join': 
+                    return
+                elif message['message_type'] == 'offline':
+                    return 
                 message.update({"host": host})
                 f.write(json.dumps(message) + '\n')
 
